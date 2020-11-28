@@ -9,14 +9,21 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async findOrCreate({ id, email }) {
+  async findOrCreate({ id, email }, fbLongLivedAccessToken: string) {
     const user = await this.userService.findOne({ fbUserId: id });
 
     if (user) {
-      return user;
+      return await this.userService.updateFbAccessToken({
+        userId: user.id,
+        fbLongLivedAccessToken,
+      });
     }
 
-    return this.userService.create({ fbUserId: id, email });
+    return this.userService.create({
+      fbUserId: id,
+      email,
+      fbLongLivedAccessToken,
+    });
   }
 
   async signUser(user: any): Promise<string> {

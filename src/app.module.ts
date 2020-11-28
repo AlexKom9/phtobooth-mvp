@@ -4,6 +4,9 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { CampaignModule } from './campaign/campaign.module';
+import { AppGateway } from './app.gateway';
+import { FacebookApiModule } from './facebook-api/facebook-api.module';
 
 @Module({
   imports: [
@@ -23,8 +26,10 @@ import { AuthModule } from './auth/auth.module';
     }),
     UserModule,
     AuthModule,
+    CampaignModule,
+    FacebookApiModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppGateway],
 })
 export class AppModule {}

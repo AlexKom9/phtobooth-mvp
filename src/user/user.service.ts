@@ -12,7 +12,10 @@ export class UserService {
   ) {}
   async findOne({ fbUserId, id }: any) {
     if (id) {
-      return this.userRepository.findOne({ where: { id } });
+      return this.userRepository.findOne({
+        where: { id },
+        relations: ['campaigns'],
+      });
     }
 
     if (fbUserId) {
@@ -20,9 +23,19 @@ export class UserService {
     }
   }
 
-  async create({ fbUserId, email }) {
-    const user = await this.userRepository.create({ fbUserId, email });
+  async create({ fbUserId, email, fbLongLivedAccessToken }) {
+    const user = await this.userRepository.create({ fbUserId, email, fbLongLivedAccessToken });
     await this.userRepository.save(user);
+    return user;
+  }
+
+  async updateFbAccessToken({ userId, fbLongLivedAccessToken }) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    user.fbLongLivedAccessToken = fbLongLivedAccessToken;
+
+    await this.userRepository.save(user);
+
     return user;
   }
 }
