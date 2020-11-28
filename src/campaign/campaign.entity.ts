@@ -3,11 +3,12 @@ import {
   CreateDateColumn,
   Entity,
   JoinTable,
-  ManyToOne,
+  ManyToOne, OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
+import PublicFile from '../files/public-file.entity';
 
 @Entity('campaign')
 export class CampaignEntity {
@@ -32,4 +33,8 @@ export class CampaignEntity {
   )
   @JoinTable()
   user: UserEntity;
+
+  @OneToMany(() => PublicFile, type => type.key)
+  @JoinTable()
+  photos: string[];
 }

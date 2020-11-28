@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { CampaignModule } from './campaign/campaign.module';
 import { AppGateway } from './app.gateway';
 import { FacebookApiModule } from './facebook-api/facebook-api.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { FacebookApiModule } from './facebook-api/facebook-api.module';
     AuthModule,
     CampaignModule,
     FacebookApiModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppGateway],

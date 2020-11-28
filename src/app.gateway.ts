@@ -40,19 +40,31 @@ export class AppGateway
   @SubscribeMessage('uploadPhoto')
   async handleUploadPhoto(client: Socket, payload: any) {
     this.logger.log(`Client send event uploadPhoto: ${client.id}`);
+    const { role, campaignId } = client.handshake.query;
 
     // console.log('uploadPhoto payload.imgData ->', payload.imgData);
     // console.log('uploadPhoto payload.fbAccountId ->', payload.fbAccountId);
     // console.log('uploadPhoto payload.fbAccountAccessToken ->', payload.fbAccountAccessToken);
 
-    const response = await this.facebookApiService.makePost({
-      accountId: payload.fbAccountId,
-      caption: 'Lalka lalka lalka',
-      dataUrl: payload.imgData,
-      accountAccessToken: payload.fbAccountAccessToken,
-    });
+    const campaign = await this.campaignService.addClientPhoto(
+      campaignId,
+      Buffer.from(
+        payload.imgData.replace(/^data:image\/\w+;base64,/, ''),
+        'base64',
+      ),
+      `client-photo-campaign-${campaignId}`,
+    );
 
-    console.log('make a post response ->', response);
+    console.log('campaign ->', campaign);
+
+    // const response = await this.facebookApiService.makePost({
+    //   accountId: payload.fbAccountId,
+    //   caption: 'Lalka lalka lalka',
+    //   dataUrl: payload.imgData,
+    //   accountAccessToken: payload.fbAccountAccessToken,
+    // });
+
+    // console.log('make a post response ->', response);
 
     // this.server.emit('takePicture', payload);
   }

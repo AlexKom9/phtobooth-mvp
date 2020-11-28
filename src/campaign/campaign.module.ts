@@ -6,6 +6,7 @@ import { CampaignEntity } from './campaign.entity';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import { JwtModule } from '@nestjs/jwt';
+import { FilesModule } from '../files/files.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { JwtModule } from '@nestjs/jwt';
       secret: "SECRET",
       signOptions: { expiresIn: '1m' },
     }),
+    FilesModule
   ],
   controllers: [CampaignController],
   providers: [UserService, CampaignService],

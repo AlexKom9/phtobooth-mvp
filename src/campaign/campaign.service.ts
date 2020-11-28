@@ -5,17 +5,10 @@ import { CampaignEntity } from './campaign.entity';
 import { UserEntity } from '../user/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
+import { FilesService } from '../files/files.service';
 
 @Injectable()
 export class CampaignService {
-  constructor(
-    @InjectRepository(CampaignEntity)
-    private readonly campaignRepository: Repository<CampaignEntity>,
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
-    private jwtService: JwtService,
-  ) {}
-
   async findOne(id: any) {
     const campaign = await this.campaignRepository.findOne({
       where: { id },
@@ -23,6 +16,15 @@ export class CampaignService {
 
     return campaign;
   }
+
+  constructor(
+    @InjectRepository(CampaignEntity)
+    private readonly campaignRepository: Repository<CampaignEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+    private readonly filesService: FilesService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async create(data: CreateCampaignDto): Promise<any> {
     const user = await this.userRepository.findOne({
@@ -74,5 +76,32 @@ export class CampaignService {
     } else {
       throw new Error(`No campaign with id: ${id}`);
     }
+  }
+
+  async getById(id) {
+    return await this.campaignRepository.findOne({
+      where: { id },
+    });
+  }
+
+  async addClientPhoto(
+    campaignId: number,
+    imageBuffer: Buffer,
+    filename: string,
+  ) {
+    const photo = await this.filesService.uploadPublicFile(
+      imageBuffer,
+      filename,
+    );
+
+    console.log('photo ->', photo);
+
+    const campaign = await this.getById(campaignId);
+
+    campaign.photos.push(photo.key);
+
+    await this.campaignRepository.update(campaignId, campaign);
+
+    return campaign;
   }
 }
