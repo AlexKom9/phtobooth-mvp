@@ -29,11 +29,6 @@ export class AppGateway
   @SubscribeMessage('takePicture')
   async handleTakePictureMessage(client: Socket, payload: string) {
     this.logger.log(`Client send event takePicture: ${client.id}, ${payload}`);
-    // const response = await this.facebookApiService.makePost({
-    //   text: 'test-text',
-    //   dataUrl: payload,
-    // });
-
     this.server.emit('takePicture', payload);
   }
 
@@ -42,31 +37,32 @@ export class AppGateway
     this.logger.log(`Client send event uploadPhoto: ${client.id}`);
     const { role, campaignId } = client.handshake.query;
 
-    // console.log('uploadPhoto payload.imgData ->', payload.imgData);
-    // console.log('uploadPhoto payload.fbAccountId ->', payload.fbAccountId);
-    // console.log('uploadPhoto payload.fbAccountAccessToken ->', payload.fbAccountAccessToken);
+    try {
+      const photo = await this.campaignService.addClientPhoto(
+        campaignId,
+        Buffer.from(
+          payload.imgData.replace(/^data:image\/\w+;base64,/, ''),
+          'base64',
+        ),
+        `client-photo-campaign-${campaignId}`,
+      );
 
-    const campaign = await this.campaignService.addClientPhoto(
-      campaignId,
-      Buffer.from(
-        payload.imgData.replace(/^data:image\/\w+;base64,/, ''),
-        'base64',
-      ),
-      `client-photo-campaign-${campaignId}`,
-    );
+      console.log(photo);
 
-    console.log('campaign ->', campaign);
 
-    // const response = await this.facebookApiService.makePost({
-    //   accountId: payload.fbAccountId,
-    //   caption: 'Lalka lalka lalka',
-    //   dataUrl: payload.imgData,
-    //   accountAccessToken: payload.fbAccountAccessToken,
-    // });
 
-    // console.log('make a post response ->', response);
+      // todo: post a link
+      // const response = await this.facebookApiService.makePost({
+      //   accountId: payload.fbAccountId,
+      //   caption: 'Lalka lalka lalka',
+      //   dataUrl: `http://d301pdcxn9df5o.cloudfront.net/${photo.key}`,
+      //   accountAccessToken: payload.fbAccountAccessToken,
+      // });
 
-    // this.server.emit('takePicture', payload);
+      // console.log('response ->', response);
+    } catch (e) {
+      console.warn(e);
+    }
   }
 
   @SubscribeMessage('guestConnected')

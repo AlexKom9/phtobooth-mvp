@@ -2,15 +2,16 @@ import { Injectable } from '@nestjs/common';
 import * as request from 'request-promise';
 import * as crypto from 'crypto';
 
-// const fetch = (url, options) =>
-//   new Promise((resolve, reject) => {
-//     request(url, { json: true, ...options }, (err, res, body) => {
-//       if (err) {
-//         reject(err);
-//       }
-//       resolve(body);
-//     });
-//   });
+// todo: remove and use axios
+const fetch = (url, options?) =>
+  new Promise((resolve, reject) => {
+    request(url, { json: true, ...options }, (err, res, body) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(body);
+    });
+  });
 
 @Injectable()
 export class FacebookApiService {
@@ -46,6 +47,7 @@ export class FacebookApiService {
   }
 
   async makePost({ accountId, caption, dataUrl, accountAccessToken }) {
+    console.log('makePost dataUrl ->', dataUrl);
     return request({
       uri: `https://graph.facebook.com/${accountId}/photos?access_token=${accountAccessToken}&appsecret_proof=${this.getFBAccessProof(
         accountAccessToken,

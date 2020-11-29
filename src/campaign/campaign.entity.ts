@@ -3,12 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   JoinTable,
-  ManyToOne, OneToMany,
+  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
-import PublicFile from '../files/public-file.entity';
+import { CampaignClientPhotoEntity } from '../files/campaign-client-photo.entity';
 
 @Entity('campaign')
 export class CampaignEntity {
@@ -34,7 +35,10 @@ export class CampaignEntity {
   @JoinTable()
   user: UserEntity;
 
-  @OneToMany(() => PublicFile, type => type.key)
+  @OneToMany(
+    () => CampaignClientPhotoEntity,
+    type => type.campaign,
+  )
   @JoinTable()
-  photos: string[];
+  photos: CampaignClientPhotoEntity[];
 }

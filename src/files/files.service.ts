@@ -1,24 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import PublicFile from './public-file.entity';
 import { S3 } from 'aws-sdk';
 import { v4 as uuid } from 'uuid';
+import { CampaignEntity } from '../campaign/campaign.entity';
+import { CampaignClientPhotoEntity } from './campaign-client-photo.entity';
 
 @Injectable()
 export class FilesService {
   constructor(
-    @InjectRepository(PublicFile)
-    private publicFilesRepository: Repository<PublicFile>,
+    @InjectRepository(CampaignClientPhotoEntity)
+    private campaignClientPhotoRepository: Repository<
+      CampaignClientPhotoEntity
+    >,
   ) {}
 
-  async uploadPublicFile(dataBuffer: Buffer, filename: string) {
+  private async uploadPublicFile(dataBuffer: Buffer, filename: string) {
     const s3 = new S3({});
-
-    console.log(
-      'process.env.AWS_PUBLIC_BUCKET_NAME ->',
-      process.env.AWS_PUBLIC_BUCKET_NAME,
-    );
 
     try {
       const uploadResult = await s3
@@ -31,16 +29,29 @@ export class FilesService {
         })
         .promise();
 
-      const newFile = this.publicFilesRepository.create({
-        key: uploadResult.Key,
-        url: uploadResult.Location,
-      });
+      console.log('uploadResult ->', uploadResult);
 
-      await this.publicFilesRepository.save(newFile);
-
-      return newFile;
+      return uploadResult;
     } catch (e) {
       console.warn(e);
     }
+  }
+
+  async uploadCampaignClientPhoto(
+    dataBuffer: Buffer,
+    filename: string,
+    campaign: CampaignEntity,
+  ) {
+    const uploadResult = await this.uploadPublicFile(dataBuffer, filename);
+
+    const newFile = this.campaignClientPhotoRepository.create({
+      key: uploadResult.Key,
+      url: uploadResult.Location,
+      campaign: campaign,
+    });
+
+    await this.campaignClientPhotoRepository.save(newFile);
+
+    return newFile;
   }
 }

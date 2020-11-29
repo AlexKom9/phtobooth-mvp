@@ -6,17 +6,10 @@ import { UserEntity } from '../user/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { FilesService } from '../files/files.service';
+import { makeWatchRun } from 'ts-loader/dist/watch-run';
 
 @Injectable()
 export class CampaignService {
-  async findOne(id: any) {
-    const campaign = await this.campaignRepository.findOne({
-      where: { id },
-    });
-
-    return campaign;
-  }
-
   constructor(
     @InjectRepository(CampaignEntity)
     private readonly campaignRepository: Repository<CampaignEntity>,
@@ -78,10 +71,13 @@ export class CampaignService {
     }
   }
 
-  async getById(id) {
-    return await this.campaignRepository.findOne({
+  async findOne(id: any) {
+    const campaign = await this.campaignRepository.findOne({
       where: { id },
+      relations: ['photos'],
     });
+
+    return campaign;
   }
 
   async addClientPhoto(
@@ -89,19 +85,12 @@ export class CampaignService {
     imageBuffer: Buffer,
     filename: string,
   ) {
-    const photo = await this.filesService.uploadPublicFile(
+    const campaign = await this.findOne(campaignId);
+
+    return await this.filesService.uploadCampaignClientPhoto(
       imageBuffer,
       filename,
+      campaign,
     );
-
-    console.log('photo ->', photo);
-
-    const campaign = await this.getById(campaignId);
-
-    campaign.photos.push(photo.key);
-
-    await this.campaignRepository.update(campaignId, campaign);
-
-    return campaign;
   }
 }

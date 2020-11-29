@@ -25,8 +25,10 @@ export class AuthController {
         accessToken,
       );
 
+      // console.log('providerUserData ->', JSON.parse(providerUserData));
+
       const user = await this.authService.findOrCreate(
-        providerUserData,
+        JSON.parse(providerUserData),
         fbLongLivedAccessToken,
       );
 
